@@ -1,0 +1,12 @@
+version: "3.7"
+
+services:
+  sdk-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "$GRAPHQL_PORT:$GRAPHQL_PORT"
+      - "$GRPC_PORT:$GRPC_PORT"
+    env_file: .env
+    restart: always
