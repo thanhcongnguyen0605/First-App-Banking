@@ -5,7 +5,6 @@ import { typeDefs } from "./typeDefs/schema"
 import { resolvers } from "./resolvers"
 import { graphqlPort } from "./config"
 
-
 const initApolloServer = async () => {
     const server = new ApolloServer({
         typeDefs,

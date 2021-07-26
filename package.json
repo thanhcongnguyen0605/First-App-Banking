@@ -9,9 +9,6 @@
     "dep": "docker-compose up --build -d",
     "dep:log": "docker-compose up --build"
   },
-  "repository": {
-    "type": "git"
-  },
   "keywords": [],
   "author": "",
   "license": "ISC",
