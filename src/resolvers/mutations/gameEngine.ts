@@ -1,3 +1,5 @@
+import { client, collectionNames, db } from "../../mongo";
+
 export function gameEngine() {
     let reuslt = Math.round(Math.random())
     console.log(reuslt)

@@ -1,13 +1,12 @@
 import { connect, Db, MongoClient } from "mongodb";
 import { mongoUri } from "./config";
 
-
 let client: MongoClient
 let db: Db
 
 const collectionNames = {
     users: 'users',
-    accounts: 'accounts',
+    gameHistory: 'gameHistory'
 }
 
 const connectDb = async () => {
