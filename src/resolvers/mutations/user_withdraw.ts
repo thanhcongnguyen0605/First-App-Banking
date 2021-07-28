@@ -7,8 +7,8 @@ const user_withdraw = async (root: any, args: any, ctx: any): Promise<{ totalMon
     session.startTransaction()
     try {
         const date = new Date()
-        const { userId, amount } = args
-        let user = await db.collection(collectionNames.users).findOne({ userId }, { session })
+        const { address, amount } = args
+        let user = await db.collection(collectionNames.users).findOne({ address }, { session })
 
         if (user.del === 1) {
             throw new Error("User has delted")
@@ -18,7 +18,7 @@ const user_withdraw = async (root: any, args: any, ctx: any): Promise<{ totalMon
             throw new Error(" total Money not Enough")
         }
 
-        await db.collection(collectionNames.users).updateOne({ user },
+        await db.collection(collectionNames.users).updateOne({ address },
             {
                 $set: { balance: user.balance -= amount, updateAt: date },
                 $inc: { totalWithDrawCount: 1 }

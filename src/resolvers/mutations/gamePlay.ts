@@ -7,9 +7,9 @@ const gamePlay = async (root: any, args: any, ctx: any): Promise<{ balance: numb
     try {
         const date = new Date()
 
-        const { userId, amount } = args
+        const { address, amount } = args
 
-        let user = await db.collection(collectionNames.users).findOne({ userId }, { session })
+        let user = await db.collection(collectionNames.users).findOne({ address }, { session })
 
         if (user.del === 1) {
             throw new Error("User has deleted")
@@ -28,17 +28,17 @@ const gamePlay = async (root: any, args: any, ctx: any): Promise<{ balance: numb
 
         if (data === "Win") {
             console.log("You Win")
-            await db.collection(collectionNames.gameHistory).insertOne({ userId: userId, updateAt: date, del: 0, status: "win", balance: user.balance, amount: amount, totalMoney: user.balance += amount * 2 })
-            await db.collection(collectionNames.users).updateOne({ user }, {
+            await db.collection(collectionNames.gameHistory).insertOne({ address: address, updateAt: date, del: 0, status: "win", balance: user.balance, amount: amount, totalMoney: user.balance += amount * 2 }, { session })
+            await db.collection(collectionNames.users).updateOne({ address }, {
                 $set: { balance: user.balance += amount * 2, updatedAt: date },
-                $inc: { totalUserWin: 1 }
-            })
+                $inc: { totalUserWin: 1, totalServerWin: amount }
+            }, { session })
         } else {
-            await db.collection(collectionNames.gameHistory).insertOne({ userId: userId, updateAt: date, del: 0, balance: user.balance, amount: amount, status: "lose", totalMoney: user.balance, }, { session })
-            await db.collection(collectionNames.users).updateOne({ user }, {
+            await db.collection(collectionNames.gameHistory).insertOne({ address: address, updateAt: date, del: 0, balance: user.balance, amount: amount, status: "lose", totalMoney: user.balance, }, { session })
+            await db.collection(collectionNames.users).updateOne({ address }, {
                 $set: { updatedAt: date },
-                $inc: { totalUserLose: 1 }
-            })
+                $inc: { totalUserLose: 1, totalServerLose: amount }
+            }, { session })
             console.log("Lose")
         }
 
