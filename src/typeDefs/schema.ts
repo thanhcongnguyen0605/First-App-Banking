@@ -13,57 +13,69 @@ enum WatchStatus {
 }
 
 type UserInformation {
-    balance: Int
-    createdAt: Date
+    balance: Int,
+    address: String,
+    totalUserCount: Int,
+    totalGameCount: Int,
+    totalGameAmount: Int,
+    totalServerWin: Int,
+    totalServerLose: Int,
+    totalUserWin: Int,
+    totalUserLose: Int,
+    totalDepositCount: Int,
+    totalWithdrawCount: Int,
+    totalWithdrawAmount: Int,
+    createdAt: Date,
     updateAt: Date
-    amount: Int
-}
-
-type FundGet {
-    balance: Int
-    totalUserCount: Int
-    totalGameCount: Int
-    totalGameAmount: Int
-    totalServerWin: Int
-    totalServerLose: Int
-    totalUserWin: Int
-    totalUserLose: Int
-    totalDepositCount: Int
-    totalWithdrawCount: Int
-    totalWithdrawAmount: Int
 }
 
 type UserGame {
-    balance: Int
+    balance: Int,
     totalDepositCount: Int
-    totalDepositAmount: Int
-    totalWithdrawCount: Int
-    totalWithdrawAmount: Int
-    totalGameCount: Int
+    totalDepositAmount: Int,
+    totalWithdrawCount: Int,
+    totalWithdrawAmount: Int,
+    totalGameCount: Int,
     totalGameAmount: Int
-    totalUserWin: Int
-    totalUserLose: Int
+    totalUserWin: Int,
+    totalUserLose: Int,
+    createdAt: Date,
+    updateAt: Date
 }
 
 type GameHistory {
-    gameId: String
-    address: String
-    number: Int
-    result: Int
-    payout: Int
-    time: Date
+    gameId: String,
+    address: String,
+    number: Int,
+    result: String,
+    payout: Int,
+    amount: Int,
+    del: Int
+    time: Date,
+}
+
+type GetHistory {
+    messgae: String,
+    pageNumber: Int,
+    pageSize: Int,
+    total: Int
+    data: [GameHistory],
+}
+
+type userGamePlay {
+    dataUser: [UserGame]
 }
 
 type Query {
-    fund_get(address: String!): FundGet
+    fund_get(address: String!): UserInformation
     user_get(address: String! ): UserInformation
-    user_game_history_get(address: String!, pageNumber: Int!, pageSize: Int!): GameHistory
-    
+    user_game_history_get(address: String!, pageNumber: Int!, pageSize: Int!): GetHistory
 }
 
 type Mutation {
-    gamePlay(amount: Int!, address: String!): UserInformation
+    gamePlay(amount: Int!, address: String!): GameHistory
     user_withdraw(amount: Int!, address: String!): UserInformation
+    depositAccount(address: String!): UserGame
 }
 
 `

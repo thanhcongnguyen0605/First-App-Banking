@@ -2,18 +2,18 @@
 import { client, collectionNames, db } from "../../mongo";
 import { Session } from 'inspector';
 
-const user_get = async (root: any, args: any, ctx: any): Promise<{  }> => {
+const game_get = async (root: any, args: any, ctx: any): Promise<{  }> => {
     //   const session = client.startSession()
     try {
         const { address } = args
         let user = await db.collection(collectionNames.users).findOne({ address })
 
         if (!user) {
-            throw new Error("User not found")
+            throw new Error(" Game Id not found")
         }
 
         if (user.del === 1) {
-            throw new Error("User has deteted")
+            throw new Error("Game Id  has deteted")
         }
         return user
 
@@ -23,4 +23,4 @@ const user_get = async (root: any, args: any, ctx: any): Promise<{  }> => {
     }
 
 }
-export { user_get }
+export { game_get }

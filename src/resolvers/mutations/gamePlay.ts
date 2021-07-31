@@ -1,7 +1,23 @@
 import { gameEngine } from './gameEngine'
 import { client, collectionNames, db } from "../../mongo";
+import { tronWeb } from '../../tronweb';
+import { User } from '../../models/User';
+import { GameHistory } from '../../models/gameHistory';
 
-const gamePlay = async (root: any, args: any, ctx: any): Promise<{ balance: number, createdAt: Date }> => {
+type Result = {
+    gameId?: String,
+    address: String,
+    number?: number,
+    result: String,
+    payout: number,
+    amount: number,
+    del?: number
+    time?: Date,
+    createdAt: Date,
+    updateAt: Date
+}
+
+const gamePlay = async (root: any, args: any, ctx: any) => {
     const session = client.startSession()
     session.startTransaction()
     try {
@@ -9,7 +25,13 @@ const gamePlay = async (root: any, args: any, ctx: any): Promise<{ balance: numb
 
         const { address, amount } = args
 
+        tronWeb.trx.getBalance(address).then(result => console.log(result))
+
         let user = await db.collection(collectionNames.users).findOne({ address }, { session })
+
+        if (!user) {
+            throw new Error(" User not found")
+        }
 
         if (user.del === 1) {
             throw new Error("User has deleted")
@@ -19,7 +41,7 @@ const gamePlay = async (root: any, args: any, ctx: any): Promise<{ balance: numb
             throw new Error(" the total Money is not enough")
         }
 
-        await db.collection(collectionNames.users).updateOne({ user }, {
+        await db.collection(collectionNames.users).findOneAndUpdate({ address: address }, {
             $set: { updatedAt: date },
             $inc: { totalGameCount: 1, balance: -amount }
         }, { session })
@@ -28,22 +50,39 @@ const gamePlay = async (root: any, args: any, ctx: any): Promise<{ balance: numb
 
         if (data === "Win") {
             console.log("You Win")
-            await db.collection(collectionNames.gameHistory).insertOne({ address: address, updateAt: date, del: 0, status: "win", balance: user.balance, amount: amount, totalMoney: user.balance += amount * 2 }, { session })
-            await db.collection(collectionNames.users).updateOne({ address }, {
+            
+            let dataGame = await db.collection(collectionNames.gameHistory).insertOne({
+                address: address,
+                time: date,
+                del: 0,
+                result: "win",
+                payout: amount * 2,
+                amount: amount
+            }, { session })
+            await db.collection(collectionNames.users).findOneAndUpdate({ address }, {
                 $set: { balance: user.balance += amount * 2, updatedAt: date },
                 $inc: { totalUserWin: 1, totalServerWin: amount }
             }, { session })
+
+            await session.commitTransaction()
+            
+            return dataGame.ops[0]
         } else {
-            await db.collection(collectionNames.gameHistory).insertOne({ address: address, updateAt: date, del: 0, balance: user.balance, amount: amount, status: "lose", totalMoney: user.balance, }, { session })
-            await db.collection(collectionNames.users).updateOne({ address }, {
+            const dataGame = await db.collection(collectionNames.gameHistory).insertOne({
+                address: address,
+                time: date,
+                del: 0,
+                payout: 0,
+                amount: amount,
+                result: "lose",
+            }, { session })
+            await db.collection<User>(collectionNames.users).findOneAndUpdate({ address }, {
                 $set: { updatedAt: date },
                 $inc: { totalUserLose: 1, totalServerLose: amount }
             }, { session })
-            console.log("Lose")
+            await session.commitTransaction()
+            return dataGame.ops[0]
         }
-
-        await session.commitTransaction()
-        return { ...user, amount }
 
     } catch (e) {
         if (session.inTransaction()) await session.abortTransaction()

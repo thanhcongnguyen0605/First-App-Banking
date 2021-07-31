@@ -3,7 +3,9 @@ import { connectDb } from "./mongo"
 import { ApolloServer } from "apollo-server"
 import { typeDefs } from "./typeDefs/schema"
 import { resolvers } from "./resolvers"
-import { graphqlPort } from "./config"
+import { ADDRESS_TRX_SERVER, graphqlPort } from "./config"
+import { connectKafkaConsumer } from "./kafka"
+
 
 const initApolloServer = async () => {
     const server = new ApolloServer({
@@ -21,6 +23,8 @@ const start = async () => {
     try {
         await connectDb()
         await initApolloServer()
+        await connectKafkaConsumer()
+
     } catch (e) {
         throw e
     }
