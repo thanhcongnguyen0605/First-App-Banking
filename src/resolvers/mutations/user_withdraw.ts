@@ -4,37 +4,41 @@ import { Session } from 'inspector';
 import { tronWeb } from '../../tronweb';
 import { User } from '../../models/User';
 import { PRIVATE_TRX_KEY, ADDRESS_TRX_SERVER } from '../../config';
+import { PubSub, withFilter } from "apollo-server";
+const pubSub = new PubSub()
 
-const user_withdraw = async (root: any, args: any, ctx: any): Promise<{  }> => {
+const user_withdraw = async (root: any, args: any, ctx: any): Promise<{}> => {
     const session = client.startSession()
     session.startTransaction()
     try {
         const date = new Date()
-        const { address, amount } = args
-        let user = await db.collection(collectionNames.users).findOne({ address }, { session })
+        const { amount, address } = args
+        let user = await db.collection(collectionNames.users).findOne({ ADDRESS_TRX_SERVER }, { session })
             ;
 
         if (!user) {
-            throw new Error (" user not found")
+            throw new Error(" user not found")
         }
-        
-            if (user.del === 1) {
-            throw new Error("User has delted")
+
+        if (user.idLock === true) {
+            throw new Error(" The account has been locked before ")
         }
 
         if (user.balance < amount) {
             throw new Error(" total Money not Enough")
         }
 
-        //tronWeb.trx.sendTransaction(address, 1000, PRIVATE_TRX_KEY)
+        tronWeb.trx.sendTransaction(address, 1000, PRIVATE_TRX_KEY)
         // create object transaction => sign = private key => boardcast
 
-        const dataUser = await db.collection(collectionNames.users).findOneAndUpdate({ address },
+        const dataUser = await db.collection(collectionNames.users).findOneAndUpdate({ ADDRESS_TRX_SERVER },
             {
                 $set: { balance: user.balance -= amount, updateAt: date },
-                $inc: { totalWithDrawCount: 1 }
+                $inc: { totalWithDrawCount: 1, totalWithdrawAmount: amount }
             }, { session }
         )
+
+        pubSub.publish('USER_GAME', { subWithDraw: dataUser})
 
         await session.commitTransaction()
 

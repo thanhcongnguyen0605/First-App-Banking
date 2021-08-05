@@ -1,8 +1,9 @@
 
 import { client, collectionNames, db } from "../../mongo";
 import { Session } from 'inspector';
+import { User } from "../../models/User";
 
-const user_get = async (root: any, args: any, ctx: any): Promise<{  }> => {
+const user_get = async (root: any, args: any, ctx: any): Promise<User> => {
     //   const session = client.startSession()
     try {
         const { address } = args
@@ -10,12 +11,8 @@ const user_get = async (root: any, args: any, ctx: any): Promise<{  }> => {
 
         if (!user) {
             throw new Error("User not found")
-        }
-
-        if (user.del === 1) {
-            throw new Error("User has deteted")
-        }
-        return user
+        } 
+        return user as User
 
     } catch (err) {
     

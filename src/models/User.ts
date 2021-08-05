@@ -1,4 +1,7 @@
+import {ObjectID} from "mongodb"
+
 interface User  {
+    _id?: ObjectID
     balance: Number
     totalDepositCount: Number
     totalDepositAmount: Number
@@ -10,6 +13,7 @@ interface User  {
     totalUserLose: Number
     createdAt: Date
     updateAt: Date
+    idLock: Boolean
 }
 export {User}
 

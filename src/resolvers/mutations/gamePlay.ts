@@ -3,6 +3,8 @@ import { client, collectionNames, db } from "../../mongo";
 import { tronWeb } from '../../tronweb';
 import { User } from '../../models/User';
 import { GameHistory } from '../../models/gameHistory';
+import { PubSub, withFilter } from "apollo-server";
+const pubSub = new PubSub()
 
 type Result = {
     gameId?: String,
@@ -25,7 +27,7 @@ const gamePlay = async (root: any, args: any, ctx: any) => {
 
         const { address, amount } = args
 
-        tronWeb.trx.getBalance(address).then(result => console.log(result))
+        tronWeb.trx.getBalance(address).then(result => console.log("Tron balance",  result / 100000))
 
         let user = await db.collection(collectionNames.users).findOne({ address }, { session })
 
@@ -33,12 +35,12 @@ const gamePlay = async (root: any, args: any, ctx: any) => {
             throw new Error(" User not found")
         }
 
-        if (user.del === 1) {
-            throw new Error("User has deleted")
+        if (user.idLock === true) {
+            throw new Error(" The account has been locked before ")
         }
 
         if (user.balance < amount) {
-            throw new Error(" the total Money is not enough")
+            throw new Error(" The total Money is not enough")
         }
 
         await db.collection(collectionNames.users).findOneAndUpdate({ address: address }, {
@@ -55,7 +57,8 @@ const gamePlay = async (root: any, args: any, ctx: any) => {
                 address: address,
                 time: date,
                 del: 0,
-                result: "win",
+                number: 1,
+                result: "Win",
                 payout: amount * 2,
                 amount: amount
             }, { session })
@@ -64,7 +67,9 @@ const gamePlay = async (root: any, args: any, ctx: any) => {
                 $inc: { totalUserWin: 1, totalServerWin: amount }
             }, { session })
 
+
             await session.commitTransaction()
+            pubSub.publish('GAME_PLAY', { subGame: dataGame.ops[0]})
             
             return dataGame.ops[0]
         } else {
@@ -72,6 +77,7 @@ const gamePlay = async (root: any, args: any, ctx: any) => {
                 address: address,
                 time: date,
                 del: 0,
+                number: 0, 
                 payout: 0,
                 amount: amount,
                 result: "lose",
@@ -81,6 +87,7 @@ const gamePlay = async (root: any, args: any, ctx: any) => {
                 $inc: { totalUserLose: 1, totalServerLose: amount }
             }, { session })
             await session.commitTransaction()
+            pubSub.publish('GAME_PLAY', { subGame: dataGame.ops[0]})
             return dataGame.ops[0]
         }
 

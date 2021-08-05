@@ -1,8 +1,11 @@
+import {ObjectID} from "mongodb"
+
 type GameHistory=  {
+    _id?: ObjectID
     gameId: String
     address: String
     number: Number
-    result: Number
+    result: String
     payout: Number
     amount: Number
     time: Date

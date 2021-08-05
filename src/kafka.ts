@@ -57,6 +57,7 @@ export const connectKafkaConsumer = async () => {
 const resolveMessage = (parseValue) => {
     const {toAddress,fromAddress,assetName, result,assetAmount}=parseValue
     if( assetName === "trx" && result === "SUCCESS" && toAddress === ADDRESS_TRX_SERVER    ) {
+        console.log("Đã nhận được Kafka")
         console.log(fromAddress)
         console.log(parseValue)
         depositAccount(fromAddress,assetAmount)

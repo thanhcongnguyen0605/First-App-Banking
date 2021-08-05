@@ -1,9 +1,8 @@
-import { connect, Db, MongoClient } from "mongodb";
+import { connect, Db, MongoClient, Collection } from "mongodb";
 import { mongoUri } from "./config";
 
 let client: MongoClient
 let db: Db
-
 const collectionNames = {
     users: 'users',
     gameHistory: 'gameHistory'
@@ -46,10 +45,6 @@ const connectDb = async () => {
         })
 
         db = client.db()
-
-        await Promise.all([
-         
-        ])
 
         console.log(`Mongodb: connected`)
     } catch (e) {
