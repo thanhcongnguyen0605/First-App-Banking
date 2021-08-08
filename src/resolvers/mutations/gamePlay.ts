@@ -13,21 +13,19 @@ type Result = {
     result: String,
     payout: number,
     amount: number,
-    del?: number
+    del?: number,
     time?: Date,
     createdAt: Date,
     updateAt: Date
 }
 
-const gamePlay = async (root: any, args: any, ctx: any) => {
+const gamePlay = async (address: string, amount: number) => {
     const session = client.startSession()
     session.startTransaction()
     try {
         const date = new Date()
 
-        const { address, amount } = args
-
-        tronWeb.trx.getBalance(address).then(result => console.log("Tron balance",  result / 100000))
+        tronWeb.trx.getBalance(address).then(result => console.log("Tron balance", result / 100000))
 
         let user = await db.collection(collectionNames.users).findOne({ address }, { session })
 
@@ -52,7 +50,7 @@ const gamePlay = async (root: any, args: any, ctx: any) => {
 
         if (data === "Win") {
             console.log("You Win")
-            
+
             let dataGame = await db.collection(collectionNames.gameHistory).insertOne({
                 address: address,
                 time: date,
@@ -67,17 +65,16 @@ const gamePlay = async (root: any, args: any, ctx: any) => {
                 $inc: { totalUserWin: 1, totalServerWin: amount }
             }, { session })
 
-
             await session.commitTransaction()
-            pubSub.publish('GAME_PLAY', { subGame: dataGame.ops[0]})
-            
+           // pubSub.publish(GAME_PLAY, { subGame: dataGame.ops[0] })
+
             return dataGame.ops[0]
         } else {
             const dataGame = await db.collection(collectionNames.gameHistory).insertOne({
                 address: address,
                 time: date,
                 del: 0,
-                number: 0, 
+                number: 0,
                 payout: 0,
                 amount: amount,
                 result: "lose",
@@ -87,7 +84,8 @@ const gamePlay = async (root: any, args: any, ctx: any) => {
                 $inc: { totalUserLose: 1, totalServerLose: amount }
             }, { session })
             await session.commitTransaction()
-            pubSub.publish('GAME_PLAY', { subGame: dataGame.ops[0]})
+
+         //   pubSub.publish(GAME_PLAY, { subGame: dataGame.ops[0] })
             return dataGame.ops[0]
         }
 

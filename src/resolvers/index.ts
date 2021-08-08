@@ -10,7 +10,12 @@ import { server_lock } from "./mutations/server_lock"
 import { server_unlock } from "./mutations/server_unlock"
 import { PubSub, withFilter } from 'graphql-subscriptions';
 
+
+
 const pubsub = new PubSub();
+
+const USER_GAME = 'OK'
+
 
 const resolvers = {
   Query: {
@@ -19,7 +24,16 @@ const resolvers = {
     fund_get
   },
   Mutation: {
-    gamePlay,
+    gamePlay: async (parent: any, args: any) => {
+      try {
+        const {address, amount } = args;
+        const result = await gamePlay(address, amount);
+        pubsub.publish(USER_GAME, { userSubGame: result})
+        return result;
+      } catch (error) {
+        throw error;
+      }
+    },
     user_withdraw,
     depositAccount,
     user_lock,
@@ -28,49 +42,37 @@ const resolvers = {
     server_lock
   },
   Subscription: {
-    //   subUser: {
-    //     subscribe: () => pubsub.asyncIterator([CREATE_USER]),
-    //   },
-    //   subDeposit: {
-    //     subscribe: withFilter(
-    //       () => pubsub.asyncIterator(USER_DEPOSIT),
-    //       (payload, args) => {
-    //         return (payload.userSubDeposit.fromAddress === args.address);
-    //       },
-    //     ),
-    //   },
-    //   subGame: {
-    //     subscribe: withFilter(
-    //       () => pubsub.asyncIterator(USER_GAME),
-    //       (payload, args) => {
-    //         return (payload.userSubGame.address === args.address);
-    //       },
-    //     ),
-    //   },
-    //   subWithDraw: {
-    //     subscribe: withFilter(
-    //       () => pubsub.asyncIterator(USER_WITHDRAW),
-    //       (payload, args) => {
-    //         return (payload.userSubWithdraw.address === args.address);
-    //       },
-    //     ),
-    //   },
-    // },
-    // Subscription: {
-    //     gameSub: () => pubsub.asyncIterator(['GAME_PLAY']),
-    //     userSubDeposit: {
-    //         subscribe: withFilter(
-    //             () => pubsub.asyncIterator(USER_DEPOSIT),
-    //             (payload, variables) => {
-    //                 return (payload.userSubDeposit.fromAddress === variables.address);
-    //             },
-    //         ),
-    //     },
-
-
-    //     userSubDeposit: () => pubsub.asyncIterator(['DEPOSIT_ACCOUNT']),
-    // },
-  }
+    subUser: {
+      subscribe: () => pubsub.asyncIterator(['CREATE_USER']),
+    },
+    subDeposit: {
+      subscribe: withFilter(
+        () => pubsub.asyncIterator('USER_DEPOSIT'),
+        (payload, args) => {
+          return (payload.userSubDeposit.fromAddress === args.address);
+        },
+      ),
+    },
+    subGame: {
+      subscribe: withFilter(
+        
+        () => pubsub.asyncIterator([USER_GAME]),
+        
+        (payload, args) => {
+          console.log(USER_GAME)
+          return (payload.userSubGame.address === args.address);
+        },
+      ),
+    },
+    subWithDraw: {
+      subscribe: withFilter(
+        () => pubsub.asyncIterator('USER_WITHDRAW'),
+        (payload, args) => {
+          return (payload.userSubWithdraw.address === args.address);
+        },
+      ),
+    },
+  },
 }
 
 export { resolvers }
