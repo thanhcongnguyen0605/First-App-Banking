@@ -13,54 +13,54 @@ import { PubSub, withFilter } from 'graphql-subscriptions';
 const pubsub = new PubSub();
 
 const resolvers = {
-    Query: {
-        user_get,
-        user_game_history_get,
-        fund_get
-    },
-    Mutation: {
-        gamePlay,
-        user_withdraw,
-        depositAccount,
-        user_lock,
-        user_unlock,
-        server_unlock,
-        server_lock
-    },
-    Subscription: {
-        subUser: {
-          subscribe: () => pubsub.asyncIterator(['CREATE_USER']),
-        },
-        subDeposit: {
-          subscribe: withFilter(
-            () => pubsub.asyncIterator('USER_DEPOSIT'),
-            (payload, args) => {
-              return (payload.userSubDeposit.fromAddress === args.address);
-            },
-          ),
-        },
-        subGame: {
-          subscribe: withFilter(
-            () => pubsub.asyncIterator('USER_GAME'),
-            (payload, args) => {
-              return (payload.userSubGame.address === args.address);
-            },
-          ),
-        },
-        subWithDraw: {
-          subscribe: withFilter(
-            () => pubsub.asyncIterator('USER_WITHDRAW'),
-            (payload, args) => {
-              return (payload.userSubWithdraw.address === args.address);
-            },
-          ),
-        },
-      },
+  Query: {
+    user_get,
+    user_game_history_get,
+    fund_get
+  },
+  Mutation: {
+    gamePlay,
+    user_withdraw,
+    depositAccount,
+    user_lock,
+    user_unlock,
+    server_unlock,
+    server_lock
+  },
+  Subscription: {
+    //   subUser: {
+    //     subscribe: () => pubsub.asyncIterator([CREATE_USER]),
+    //   },
+    //   subDeposit: {
+    //     subscribe: withFilter(
+    //       () => pubsub.asyncIterator(USER_DEPOSIT),
+    //       (payload, args) => {
+    //         return (payload.userSubDeposit.fromAddress === args.address);
+    //       },
+    //     ),
+    //   },
+    //   subGame: {
+    //     subscribe: withFilter(
+    //       () => pubsub.asyncIterator(USER_GAME),
+    //       (payload, args) => {
+    //         return (payload.userSubGame.address === args.address);
+    //       },
+    //     ),
+    //   },
+    //   subWithDraw: {
+    //     subscribe: withFilter(
+    //       () => pubsub.asyncIterator(USER_WITHDRAW),
+    //       (payload, args) => {
+    //         return (payload.userSubWithdraw.address === args.address);
+    //       },
+    //     ),
+    //   },
+    // },
     // Subscription: {
     //     gameSub: () => pubsub.asyncIterator(['GAME_PLAY']),
     //     userSubDeposit: {
     //         subscribe: withFilter(
-    //             () => pubsub.asyncIterator('USER_DEPOSIT'),
+    //             () => pubsub.asyncIterator(USER_DEPOSIT),
     //             (payload, variables) => {
     //                 return (payload.userSubDeposit.fromAddress === variables.address);
     //             },
@@ -70,6 +70,7 @@ const resolvers = {
 
     //     userSubDeposit: () => pubsub.asyncIterator(['DEPOSIT_ACCOUNT']),
     // },
+  }
 }
 
 export { resolvers }
