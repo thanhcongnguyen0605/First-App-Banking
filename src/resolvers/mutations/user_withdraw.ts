@@ -7,14 +7,13 @@ import { PRIVATE_TRX_KEY, ADDRESS_TRX_SERVER } from '../../config';
 import { PubSub, withFilter } from "apollo-server";
 const pubSub = new PubSub()
 
-const user_withdraw = async (root: any, args: any, ctx: any): Promise<{}> => {
+const user_withdraw = async (address: string, amount: number) => {
     const session = client.startSession()
     session.startTransaction()
     try {
         const date = new Date()
-        const { amount, address } = args
-        let user = await db.collection(collectionNames.users).findOne({ ADDRESS_TRX_SERVER }, { session })
-            ;
+        
+        let user = await db.collection(collectionNames.users).findOne({ address: address }, { session });
 
         if (!user) {
             throw new Error(" user not found")
@@ -38,7 +37,7 @@ const user_withdraw = async (root: any, args: any, ctx: any): Promise<{}> => {
             }, { session }
         )
 
-        pubSub.publish('USER_GAME', { subWithDraw: dataUser})
+//        pubSub.publish(USER_GAME, { subWithDraw: dataUser})
 
         await session.commitTransaction()
 

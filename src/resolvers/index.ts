@@ -10,11 +10,11 @@ import { server_lock } from "./mutations/server_lock"
 import { server_unlock } from "./mutations/server_unlock"
 import { PubSub, withFilter } from 'graphql-subscriptions';
 
-
-
 const pubsub = new PubSub();
 
-const USER_GAME = 'OK'
+const USER_GAME = 'USER_GAME'
+const USER_WITHDRAW = "USER_WITHDRAW"
+const USER_DEPOSIT = "USER_DEPOSIT"
 
 
 const resolvers = {
@@ -28,26 +28,43 @@ const resolvers = {
       try {
         const {address, amount } = args;
         const result = await gamePlay(address, amount);
-        pubsub.publish(USER_GAME, { userSubGame: result})
+        pubsub.publish(USER_GAME, { gamePlay: result})
         return result;
       } catch (error) {
         throw error;
       }
     },
-    user_withdraw,
-    depositAccount,
+    user_withdraw: async (parent: any, args: any) => {
+      try {
+        const {address, amount } = args;
+        const result = await user_withdraw(address, amount);
+
+        pubsub.publish(USER_WITHDRAW, { user_withdraw: result})
+        return result;
+      } catch (error) {
+        throw error;
+      }
+    },
+    depositAccount: async (parent: any, args: any) => {
+      try {
+        const {address, amount } = args;
+        const result = await depositAccount(address, amount);
+
+        pubsub.publish(USER_DEPOSIT, { depositAccount: result})
+        return result;
+      } catch (error) {
+        throw error;
+      }
+    },
     user_lock,
     user_unlock,
     server_unlock,
     server_lock
   },
   Subscription: {
-    subUser: {
-      subscribe: () => pubsub.asyncIterator(['CREATE_USER']),
-    },
     subDeposit: {
       subscribe: withFilter(
-        () => pubsub.asyncIterator('USER_DEPOSIT'),
+        () => pubsub.asyncIterator(USER_DEPOSIT),
         (payload, args) => {
           return (payload.userSubDeposit.fromAddress === args.address);
         },
@@ -66,7 +83,7 @@ const resolvers = {
     },
     subWithDraw: {
       subscribe: withFilter(
-        () => pubsub.asyncIterator('USER_WITHDRAW'),
+        () => pubsub.asyncIterator(USER_WITHDRAW),
         (payload, args) => {
           return (payload.userSubWithdraw.address === args.address);
         },
