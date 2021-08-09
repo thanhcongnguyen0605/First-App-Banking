@@ -98,11 +98,9 @@ type Mutation {
 }
 
 type Subscription {
-    subUser: UserInformation
-    subDeposit: UserInformation
-    subGame: UserInformation
-    subWithDraw: UserInformation
-    depositAccount: UserInformation
+    subGame(address: String!): UserInformation
+    subWithDraw(address: String!): UserInformation
+    subDeposit(address: String!): UserInformation
 }
 
 `
