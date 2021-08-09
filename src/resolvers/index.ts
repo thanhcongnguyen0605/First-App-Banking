@@ -66,7 +66,7 @@ const resolvers = {
       subscribe: withFilter(
         () => pubsub.asyncIterator(USER_DEPOSIT),
         (payload, args) => {
-          return (payload.userSubDeposit.fromAddress === args.address);
+          return (payload.depositAccount.address === args.address);
         },
       ),
     },
@@ -77,7 +77,7 @@ const resolvers = {
         
         (payload, args) => {
           console.log(USER_GAME)
-          return (payload.userSubGame.address === args.address);
+          return (payload.gamePlay.address === args.address);
         },
       ),
     },
@@ -85,7 +85,7 @@ const resolvers = {
       subscribe: withFilter(
         () => pubsub.asyncIterator(USER_WITHDRAW),
         (payload, args) => {
-          return (payload.userSubWithdraw.address === args.address);
+          return (payload.user_withdraw.address === args.address);
         },
       ),
     },

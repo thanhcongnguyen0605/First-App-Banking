@@ -94,7 +94,7 @@ type Mutation {
     server_unlock: ServerLock
     gamePlay(amount: Int!, address: String!): GameHistory
     user_withdraw(amount: Int!, address: String!): UserInformation
-    depositAccount(address: String!): UserInformation
+    depositAccount(address: String!, amount: Int): UserInformation
 }
 
 type Subscription {
@@ -102,11 +102,7 @@ type Subscription {
     subDeposit: UserInformation
     subGame: UserInformation
     subWithDraw: UserInformation
-
-
-
-    
-
+    depositAccount: UserInformation
 }
 
 `
