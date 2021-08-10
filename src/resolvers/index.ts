@@ -67,6 +67,21 @@ const resolvers = {
     // subGame: {
     //   subscribe: () => pubsub.asyncIterator(USER_GAME),
     // },
+    subGame: {
+      subscribe: withFilter(
+
+        () => pubsub.asyncIterator(USER_GAME),
+
+        (payload, args) => {
+          return (payload.gamePlay.address === args.address);
+        },
+      ),
+      resolve: (payload) => {
+        console.log(payload)
+        
+        return payload.gamePlay
+      }
+    }, 
     subDeposit: {
       subscribe: withFilter(
         () => pubsub.asyncIterator(USER_DEPOSIT),
@@ -74,27 +89,9 @@ const resolvers = {
           return (payload.depositAccount.address === args.address);
         },
       ),
-      resolve: (payload) => ({
-        payload
-
-      })
-    },
-    subGame: {
-      subscribe: withFilter(
-
-        () => pubsub.asyncIterator(USER_GAME),
-
-        (payload, args) => {
-
-          console.log("okkkkkk", payload.gamePlay) // cosole.log ok
-          console.log("123456", args.address)  // cosole.log ok
-
-          return (payload.gamePlay.address === args.address);
-        },
-      ),
-      resolve: (payload: GameHistory) => ({
-        payload
-      })
+      resolve: (payload) => {
+        return payload.depositAccount
+      }
     },
     subWithDraw: {
       subscribe: withFilter(
@@ -103,9 +100,9 @@ const resolvers = {
           return (payload.user_withdraw.address === args.address);
         },
       ),
-      resolve: (payload) => ({
-        payload
-      })
+      resolve: (payload) => {
+        return payload.user_withdraw
+      }
     },
   },
 }
