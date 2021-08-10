@@ -9,10 +9,11 @@ import { user_unlock } from "./mutations/user_unlock"
 import { server_lock } from "./mutations/server_lock"
 import { server_unlock } from "./mutations/server_unlock"
 import { PubSub, withFilter } from 'graphql-subscriptions';
+import { GameHistory } from "../models/gameHistory"
 
 const pubsub = new PubSub();
 
-const USER_GAME = 'USER_GAME'
+const USER_GAME = "USER_GAME"
 const USER_WITHDRAW = "USER_WITHDRAW"
 const USER_DEPOSIT = "USER_DEPOSIT"
 
@@ -26,9 +27,9 @@ const resolvers = {
   Mutation: {
     gamePlay: async (parent: any, args: any) => {
       try {
-        const {address, amount } = args;
+        const { address, amount } = args;
         const result = await gamePlay(address, amount);
-        pubsub.publish(USER_GAME, { gamePlay: result})
+        pubsub.publish(USER_GAME, { gamePlay: result })
         return result;
       } catch (error) {
         throw error;
@@ -36,10 +37,10 @@ const resolvers = {
     },
     user_withdraw: async (parent: any, args: any) => {
       try {
-        const {address, amount } = args;
+        const { address, amount } = args;
         const result = await user_withdraw(address, amount);
 
-        pubsub.publish(USER_WITHDRAW, { user_withdraw: result})
+        pubsub.publish(USER_WITHDRAW, { user_withdraw: result })
         return result;
       } catch (error) {
         throw error;
@@ -47,10 +48,10 @@ const resolvers = {
     },
     depositAccount: async (parent: any, args: any) => {
       try {
-        const {address, amount } = args;
+        const { address, amount } = args;
         const result = await depositAccount(address, amount);
 
-        pubsub.publish(USER_DEPOSIT, { depositAccount: result})
+        pubsub.publish(USER_DEPOSIT, { depositAccount: result })
         return result;
       } catch (error) {
         throw error;
@@ -61,7 +62,11 @@ const resolvers = {
     server_unlock,
     server_lock
   },
+
   Subscription: {
+    // subGame: {
+    //   subscribe: () => pubsub.asyncIterator(USER_GAME),
+    // },
     subDeposit: {
       subscribe: withFilter(
         () => pubsub.asyncIterator(USER_DEPOSIT),
@@ -69,17 +74,27 @@ const resolvers = {
           return (payload.depositAccount.address === args.address);
         },
       ),
+      resolve: (payload) => ({
+        payload
+
+      })
     },
     subGame: {
       subscribe: withFilter(
-        
-        () => pubsub.asyncIterator([USER_GAME]),
-        
+
+        () => pubsub.asyncIterator(USER_GAME),
+
         (payload, args) => {
-          console.log(USER_GAME)
+
+          console.log("okkkkkk", payload.gamePlay) // cosole.log ok
+          console.log("123456", args.address)  // cosole.log ok
+
           return (payload.gamePlay.address === args.address);
         },
       ),
+      resolve: (payload: GameHistory) => ({
+        payload
+      })
     },
     subWithDraw: {
       subscribe: withFilter(
@@ -88,6 +103,9 @@ const resolvers = {
           return (payload.user_withdraw.address === args.address);
         },
       ),
+      resolve: (payload) => ({
+        payload
+      })
     },
   },
 }
