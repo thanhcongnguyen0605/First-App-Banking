@@ -2,9 +2,9 @@ import { Kafka } from "kafkajs"
 import { ADDRESS_TRX_SERVER } from "./config"
 import { depositAccount } from "./resolvers/mutations/depositAccount"
 
-const kafkaClientId = "congbackenddev"
-const kafkaBrokers = ["139.99.210.62:9193"]
-const kafkaGroupId = "cong-group-dev"
+const kafkaClientId = "Kafka"
+const kafkaBrokers = ["AddressKafka"]
+const kafkaGroupId = "GroupKapfa"
 const topicName = "transaction"
 
 const kafka = new Kafka({
